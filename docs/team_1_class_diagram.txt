@@ -1,0 +1,106 @@
+classDiagram
+    direction LR
+
+    class run {
+        <<script>>
+        +parse_args() Namespace
+    }
+
+    class config {
+        <<module>>
+        +get_parameter(name, default) any
+        +set_parameter(name, value) void
+        +overwrite_from_args(args) void
+    }
+
+    class State {
+        <<enumeration>>
+        open
+        closed
+    }
+
+    class Event {
+        +str event_type
+        +str author
+        +datetime event_date
+        +str label
+        +str comment
+        +from_json(jobj) void
+    }
+
+    class Issue {
+        +str url
+        +str creator
+        +List~str~ labels
+        +State state
+        +List~str~ assignees
+        +str title
+        +str text
+        +int number
+        +datetime created_date
+        +datetime updated_date
+        +str timeline_url
+        +List~Event~ events
+        +from_json(jobj) void
+    }
+
+    class DataLoader {
+        -str data_path
+        +get_issues() List~Issue~
+        -_load() List~Issue~
+    }
+
+    class ExampleAnalysis {
+        -str USER
+        +run() void
+    }
+
+    class LabelResolutionAnalysis {
+        -str LABEL
+        +run() void
+        -filter_by_label(issues) List~Issue~
+        -resolution_days(issue) float
+        -summarize_by_label(issues) DataFrame
+        -plot_summary(summary) void
+    }
+
+    class ContributorActivityAnalysis {
+        -str USER
+        +run() void
+        -count_actions(issues) DataFrame
+        -compare_roles(counts) DataFrame
+        -plot_activity(counts) void
+    }
+
+    class DiscussionTrendAnalysis {
+        +run() void
+        -bucket_by_month(issues) DataFrame
+        -discussion_metrics(issues) DataFrame
+        -plot_trends(metrics) void
+    }
+
+    run ..> config : overwrite_from_args
+    run ..> ExampleAnalysis : feature 0
+    run ..> LabelResolutionAnalysis : feature 1
+    run ..> ContributorActivityAnalysis : feature 2
+    run ..> DiscussionTrendAnalysis : feature 3
+
+    DataLoader ..> config : reads data path
+    DataLoader ..> Issue : creates
+
+    Issue "1" *-- "0..*" Event : events
+    Issue --> State : state
+
+    ExampleAnalysis ..> DataLoader : uses
+    LabelResolutionAnalysis ..> DataLoader : uses
+    ContributorActivityAnalysis ..> DataLoader : uses
+    DiscussionTrendAnalysis ..> DataLoader : uses
+
+    ExampleAnalysis ..> config : reads user
+    LabelResolutionAnalysis ..> config : reads label
+    ContributorActivityAnalysis ..> config : reads user
+
+    ExampleAnalysis ..> Issue : analyzes
+    LabelResolutionAnalysis ..> Issue : analyzes
+    ContributorActivityAnalysis ..> Issue : analyzes
+    DiscussionTrendAnalysis ..> Issue : analyzes
