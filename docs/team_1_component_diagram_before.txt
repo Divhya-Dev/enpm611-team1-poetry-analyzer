@@ -1,0 +1,15 @@
+flowchart TD
+    run["run.py<br/>"]
+    config["config.py<br/>"]
+    model["model.py<br/>"]
+    loader["data_loader.py<br/>"]
+    example["example_analysis.py<br/>"]
+
+    run -->|"Updates configuration with CLI arguments"| config
+    run -->|"Instantiates ExampleAnalysis and calls run()"| example
+    
+    example -->|"instantiates DataLoader and calls get_issues()"| loader
+    example -->|"imports Issue and Event"| model
+    example -->|"reads user settings"| config
+    loader -->|"creates Issue and Event objects"| model
+    loader -->|"reads configured data-file path"| config

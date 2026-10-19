@@ -1,0 +1,43 @@
+sequenceDiagram
+    actor User
+    participant Run as run.py
+    participant Config as config.py
+    participant Analysis as contributor_activity_analysis.py
+    participant Loader as data_loader.py
+    participant Model as model.py
+    participant Plot as Matplotlib (internal plotting)
+
+    User->>Run: Execute `python run.py --feature 2 [--user USERNAME]`
+    Run->>Config: overwrite_from_args(args)
+    Config-->>Run: Configuration updated
+    Run->>Analysis: run()
+    Analysis->>Config: get_parameter("user")
+    Config-->>Analysis: Optional username / None
+    Analysis->>Loader: get_issues()
+    Loader->>Loader: Check cached issues
+    alt Issues not cached
+        Loader->>Loader: Load and parse issue data
+        Loader->>Model: Create Issue objects with Event lists
+        Model-->>Loader: Parsed issue/event objects
+    else Issues already cached
+        Loader-->>Loader: Return cached issue list
+    end
+    Loader-->>Analysis: List[Issue]
+    Analysis->>Analysis: Filter/inspect issues and events
+    Analysis->>Analysis: Classify events as comments, label actions, or closures
+    Analysis->>Analysis: Aggregate counts by contributor
+    opt A username was supplied
+        Analysis->>Analysis: Filter contributor results to requested username
+    end
+    Analysis->>Analysis: Print contributor activity summary
+    opt At least two contributors are available and no user filter is set
+        Analysis->>Analysis: Calculate correlations between activity measures
+    end
+    Analysis->>Plot: _plot_activity(activity data)
+    Plot-->>Analysis: Display grouped bar chart
+    opt No user filter and at least two contributors
+        Analysis->>Plot: _plot_relationship(activity data)
+        Plot-->>Analysis: Display comments-vs-actions scatter plot
+    end
+    Analysis-->>Run: Analysis complete
+    Run-->>User: Console summary and chart window

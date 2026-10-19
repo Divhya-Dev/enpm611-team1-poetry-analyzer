@@ -1,0 +1,28 @@
+flowchart TD
+    run["run.py<br/>"]
+    config["config.py<br/>"]
+    model["model.py<br/>"]
+    loader["data_loader.py<br/>"]
+    example["example_analysis.py<br/>"]
+
+    label["label_resolution_analysis.py<br/>"]
+    contributor["contributor_activity_analysis.py<br/>"]
+    discussion["discussion_trend_analysis.py<br/>"]
+
+    run -->|"Updates configuration with CLI arguments"| config
+    run -->|"Feature 0: Instantiates ExampleAnalysis and calls run()"| example
+    run -->|"Feature 1: Instantiates LabelResolutionAnalysis and calls run()"| label
+    run -->|"Feature 2: Instantiates ContributorActivityAnalysis and calls run()"| contributor
+    run -->|"Feature 3: Instantiates DiscussionTrendAnalysis and calls run()"| discussion
+
+    example -->|"instantiates DataLoader and calls get_issues()"| loader
+    example -->|"reads user settings"| config
+    example -->|"imports Issue and Event"| model
+    label -->|"requests issue and label data"| loader
+    contributor -->|"requests issue and event data"| loader
+    discussion -->|"requests issue and comment data"| loader
+
+    loader -->|"reads configured data path"| config
+    loader -->|"creates Issue and Event objects"| model
+    label -->|"gets optional --label parameter"| config
+    contributor -->|"gets optional --user parameter"| config
