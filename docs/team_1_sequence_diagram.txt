@@ -6,19 +6,26 @@ sequenceDiagram
     participant Loader as data_loader.py
     participant Model as model.py
     participant Plot as Matplotlib (internal plotting)
+    autonumber
 
-    User->>Run: Execute `python run.py --feature 2 [--user USERNAME]`
+    User->>Run: python run.py --feature 2 [--user USERNAME]
     Run->>Config: overwrite_from_args(args)
     Config-->>Run: Configuration updated
-    Run->>Analysis: run()
+    Run->>Analysis: ContributorActivityAnalysis().run()
     Analysis->>Config: get_parameter("user")
     Config-->>Analysis: Optional username / None
+    Analysis->>Loader: DataLoader()
+    Loader->>Config: Read configured data file path
+    Config-->>Loader: Return data file path
     Analysis->>Loader: get_issues()
     Loader->>Loader: Check cached issues
     alt Issues not cached
         Loader->>Loader: Load and parse issue data
-        Loader->>Model: Create Issue objects with Event lists
-        Model-->>Loader: Parsed issue/event objects
+        loop For each issue in JSON
+            Loader->>Model: Creates Issue and Event objects
+            Model-->>Loader: Return Issue object with its Events
+        end
+        Loader->>Loader: Store loaded issues in _ISSUES
     else Issues already cached
         Loader-->>Loader: Return cached issue list
     end
