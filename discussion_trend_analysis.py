@@ -358,7 +358,35 @@ class DiscussionTrendAnalysis:
                 )
             else:
                 print('Interpretation: no issue data was available to analyze.')
+
     
+    
+    def _print_additional_insights(self, median_comments, hotspots):
+        print("\n" + "=" * 60)
+        print("ADDITIONAL DISCUSSION INSIGHTS")
+        print("=" * 60)
+
+        print(f"\nMedian comments per issue: {median_comments:.2f}")
+
+        if median_comments == 0:
+            print("Hotspot threshold: More than 0 comments")
+        else:
+            print(
+                f"Hotspot threshold: At least {2 * median_comments:.2f} comments"
+            )
+
+        print(f"Number of discussion hotspots: {len(hotspots)}")
+
+        if hotspots:
+            print("\nMost active discussion hotspots:")
+            for issue, comment_count in hotspots[:10]:
+                print(
+                    f"Issue #{issue.number}: {issue.title} "
+                    f"({comment_count} comments)"
+                )
+        else:
+            print("No discussion hotspots found.")
+
 
 
     def run(self) -> None:
