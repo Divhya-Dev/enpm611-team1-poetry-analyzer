@@ -153,6 +153,46 @@ class DiscussionTrendAnalysis:
         return median_comments, hotspots
 
 
+    @staticmethod
+    def _describe_trend(
+        monthly_activity: Dict[datetime, Dict[str, int]]
+    ) -> str:
+        """Compare average monthly comments in the first and second halves."""
+        months = list(monthly_activity.items())
+
+        if len(months) < 2:
+            return 'relatively stable (not enough monthly data to compare)'
+
+        midpoint = len(months) // 2
+
+        earlier_average = (
+            sum(values['comments'] for _, values in months[:midpoint])
+            / midpoint
+        )
+
+        later_months = months[midpoint:]
+
+        later_average = (
+            sum(values['comments'] for _, values in later_months)
+            / len(later_months)
+        )
+
+        overall_average = (
+            sum(values['comments'] for _, values in months) / len(months)
+        )
+
+        tolerance = overall_average * 0.1
+        difference = later_average - earlier_average
+
+        if difference > tolerance:
+            return 'increasing'
+
+        if difference < -tolerance:
+            return 'decreasing'
+
+        return 'relatively stable'
+
+
     def run(self) -> None:
             """Load issues, report discussion patterns, and display charts."""
             issues: List[Issue] = DataLoader().get_issues() or []
