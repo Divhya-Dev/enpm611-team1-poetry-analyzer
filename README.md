@@ -191,7 +191,7 @@ your own subsection and your own feature section above).
 - **Implementation:** Feature 2, contributor activity analysis (`contributor_activity_analysis.py`).
 - **Shared code:** helpers in `model.py` (`is_human`, `closed_date`, `days_to_close`, `human_comments`), a clear error in `data_loader.py` when the data file is missing, and `numpy` in `requirements.txt` (pull request #2).
 
-### [Member 2: Tyree Black]
+### Tyree Black
 
 _Implemented Feature 1: Label Resolution Analysis. Created `label_resolution.py` to analyze closed issues by label, calculate median resolution times using issue creation dates and closing events, and generate a Matplotlib bar chart comparing the median number of days to close for each label. Added the Feature 1 execution branch to `run.py` so the analysis can be launched using `python run.py --feature 1`._
 
