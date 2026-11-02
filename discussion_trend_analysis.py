@@ -27,25 +27,70 @@ class DiscussionTrendAnalysis:
         )
 
 
-@staticmethod
-def _parse_event_date(date_value):
-    """Convert a datetime or ISO timestamp string into a UTC datetime."""
-    if date_value is None:
-        return None
-
-    try:
-        if isinstance(date_value, str):
-            date_value = datetime.fromisoformat(
-                date_value.replace('Z', '+00:00')
-            )
-
-        if not isinstance(date_value, datetime):
+    @staticmethod
+    def _parse_event_date(date_value):
+        """Convert a datetime or ISO timestamp string into a UTC datetime."""
+        if date_value is None:
             return None
 
-        if date_value.tzinfo is None:
-            return date_value.replace(tzinfo=timezone.utc)
+        try:
+            if isinstance(date_value, str):
+                date_value = datetime.fromisoformat(
+                    date_value.replace('Z', '+00:00')
+                )
 
-        return date_value.astimezone(timezone.utc)
+            if not isinstance(date_value, datetime):
+                return None
 
-    except (ValueError, TypeError):
-        return None
+            if date_value.tzinfo is None:
+                return date_value.replace(tzinfo=timezone.utc)
+
+            return date_value.astimezone(timezone.utc)
+
+        except (ValueError, TypeError):
+            return None
+
+
+
+    @staticmethod
+    def _group_monthly_activity(
+        issue_comment_counts: List[Tuple[Issue, int]]
+    ) -> Dict[datetime, Dict[str, int]]:
+        """Group issue counts and their comments by issue creation month."""
+        activity = defaultdict(lambda: {'issues': 0, 'comments': 0})
+
+        for issue, comment_count in issue_comment_counts:
+            created_date = issue.created_date
+
+            if not isinstance(created_date, datetime):
+                continue
+
+            month = datetime(created_date.year, created_date.month, 1)
+            activity[month]['issues'] += 1
+            activity[month]['comments'] += comment_count
+
+        return dict(sorted(activity.items()))
+
+
+    def run(self) -> None:
+            """Load issues, report discussion patterns, and display charts."""
+            issues: List[Issue] = DataLoader().get_issues() or []
+    
+            issue_comment_counts = [
+                (issue, self._count_comments(issue))
+                for issue in issues
+            ]
+    
+            total_comments = sum(
+                comment_count for _, comment_count in issue_comment_counts
+            )
+    
+            monthly_activity = self._group_monthly_activity(
+                issue_comment_counts
+            )
+
+    
+    
+if __name__ == '__main__':
+        DiscussionTrendAnalysis().run()
+    
