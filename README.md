@@ -61,8 +61,34 @@ Every analysis prints its **question**, **method** and **finding** to the consol
 
 ### Feature 1: Label resolution (`label_resolution_analysis.py`)
 
-_Feature 1 owner: replace this line with the question, run commands, method, output and limitations of feature 1._
+**Question:** Which types of issues, grouped by label, take the longest to resolve in the Poetry project?
 
+**Run Command:**
+```bash
+python run.py --feature 1
+```
+
+The project data path must be configured through the `ENPM611_PROJECT_DATA_PATH` environment variable before running the analysis.
+
+**Method:**
+- Loads issue data using the project's `DataLoader`.
+- Identifies closed issues with valid creation dates and closing events.
+- Calculates resolution time in days using the issue creation date and closing event date.
+- Groups resolution times by issue label.
+- Calculates the median resolution time for each label with at least five resolved issues.
+
+**Output:**
+- Displays each issue label, its median resolution time in days, and the number of issues analyzed in the terminal.
+- Generates a Matplotlib bar chart titled **Median Issue Resolution Time by Label**.
+- The chart compares issue labels on the X-axis against median days to close on the Y-axis.
+
+**Limitations:**
+- Only closed issues with valid creation dates and closing events are included.
+- Issues without usable resolution dates are excluded.
+- Labels with fewer than five resolved issues are excluded from the results.
+- The analysis measures resolution time based on recorded closing events and does not account for the complexity or severity of individual issues.
+
+  
 ### Feature 2: Contributor activity (`contributor_activity_analysis.py`)
 
 - **Question:** Who does the work on the project, do frequent commenters also
