@@ -1,4 +1,4 @@
-```python
+
 from collections import defaultdict
 from statistics import median
 import matplotlib.pyplot as plt
@@ -205,4 +205,3 @@ class LabelResolutionAnalysis:
         plt.tight_layout()
 
         plt.show()
-```
