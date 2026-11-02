@@ -126,13 +126,13 @@ The project data path must be configured through the `ENPM611_PROJECT_DATA_PATH`
 
 ### Feature 3: Discussion trends (`discussion_trend_analysis.py`)
 
-Question:
+**Question:**
 How has issue creation and discussion activity changed over time in the Poetry project, and which issues attract the most discussion?
 
-Run Command:
+**Run Command:**
 python run.py --feature 3
 
-Method:
+**Method:**
 This feature analyzes GitHub issue discussions in the Poetry project using the following steps:
 1. Counts comment events for each issue, excluding other timeline events.
 2. Groups issues by their creation month and comments by their actual comment event dates to analyze monthly activity.
@@ -144,7 +144,7 @@ This feature analyzes GitHub issue discussions in the Poetry project using the f
 5. alculates the median number of comments per issue and identifies discussion hotspots using twice the median as the threshold. If the median is zero, issues with at least one comment are considered hotspots.
 6. Compares average monthly activity across the earlier and later halves of the observation period to identify increasing, decreasing, or relatively stable trends.
 
-Output:
+**Output:**
 The feature prints a console report containing:
 
 - Total issues and comments analyzed.
@@ -160,6 +160,10 @@ The feature prints a console report containing:
 It generates two visualizations:
 1. Monthly Issue and Comment Activity: A line chart comparing the number of issues created and comments posted over time.
 2. Discussion Intensity Distribution: A bar chart showing the number of issues in the Low, Medium, and High discussion categories.
+
+**Limitations**
+- Comment count does not reflect issue complexity: An issue receiving many comments is not necessarily more complex or important than one receiving fewer comments. The analysis measures discussion volume rather than the actual significance or difficulty of an issue.
+- Limited trend interpretation: Monthly activity trends show changes in issue creation and comment volume but do not explain why those changes occurred or measure the quality of discussions.
 
 ## Known limitations and assumptions
 
@@ -209,8 +213,7 @@ It generates two visualizations:
 
 ## Team contributions
 
-Each member describes their own work in their own subsection below (edit only
-your own subsection and your own feature section above).
+Each member describes their own work in their own subsection below.
 
 ### Shengjie Liu
 
@@ -221,5 +224,5 @@ your own subsection and your own feature section above).
 
 _Implemented Feature 1: Label Resolution Analysis. Created `label_resolution.py` to analyze closed issues by label, calculate median resolution times using issue creation dates and closing events, and generate a Matplotlib bar chart comparing the median number of days to close for each label. Added the Feature 1 execution branch to `run.py` so the analysis can be launched using `python run.py --feature 1`._
 
-### [Member 3: Divhya Gnanasekar]
-_Implemented Feature 3: Developed the Discussion Trend Analysis, including monthly activity tracking, discussion intensity classification, hotspot identification, console reports, and visualizations._
+### Divhya Gnanasekar
+_Implemented Feature 3: Developed the Discussion Trend Analysis 'discussion_trend_analysis.py', including monthly activity tracking, discussion intensity classification, hotspot identification, console reports, and visualizations._
