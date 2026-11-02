@@ -86,7 +86,7 @@ The project data path must be configured through the `ENPM611_PROJECT_DATA_PATH`
 - Only closed issues with valid creation dates and closing events are included.
 - Issues without usable resolution dates are excluded.
 - Labels with fewer than five resolved issues are excluded from the results.
-- The analysis measures resolution time based on recorded closing events and does not account for the complexity or severity of individual issues._
+- The analysis measures resolution time based on recorded closing events and does not account for the complexity or severity of individual issues.
 
 ### Feature 2: Contributor activity (`contributor_activity_analysis.py`)
 
