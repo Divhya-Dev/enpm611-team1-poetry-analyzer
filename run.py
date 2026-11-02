@@ -9,7 +9,6 @@ import argparse
 
 import config
 from example_analysis import ExampleAnalysis
-from label_resolution import Feature1Analysis
 
 
 def parse_args():
@@ -49,7 +48,7 @@ config.overwrite_from_args(args)
 if args.feature == 0:
     ExampleAnalysis().run()
 elif args.feature == 1:
-    Feature1Analysis().run()
+    pass # TODO call first analysis
 elif args.feature == 2:
     pass # TODO call second analysis
 elif args.feature == 3:
