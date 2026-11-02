@@ -482,11 +482,44 @@ class DiscussionTrendAnalysis:
             issue_comment_counts
         )
 
-        print("\n"
-            "Issues are grouped by their creation month, while "
-            "comments are grouped by their actual event date. "
-            "Monthly activity is compared across the observation period."
+        
+        print("\n" + "=" * 60)
+        print("DISCUSSION TREND ANALYSIS")
+        print("=" * 60)
+
+        print("\nQUESTION:")
+        print(
+            "How has issue creation and discussion activity changed "
+            "over time in the Poetry project, and which issues attract "
+            "the most discussion?"
         )
+
+        print("\nMETHOD:")
+        print(
+            "1. Count comment events for each issue."
+        )
+        print(
+            "2. Group issues by their creation month and comments "
+            "by their actual event dates."
+        )
+        print(
+            "3. Classify issues into Low (0-2), Medium (3-10), "
+            "and High (more than 10) discussion categories."
+        )
+        print(
+            "4. Rank issues by comment count, including ties at "
+            "the fifth position."
+        )
+        print(
+            "5. Identify discussion hotspots using twice the median "
+            "comment count as the threshold."
+        )
+        print(
+            "6. Compare monthly activity across the observation period "
+            "to identify trends."
+        )
+
+        print("\nFINDING:")
 
         self._print_report(
             issue_comment_counts,
