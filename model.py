@@ -1,3 +1,4 @@
+
 """
 Implements a runtime data model that can be used to access
 the properties contained in the issues JSON.
@@ -81,3 +82,5 @@ class Issue:
             pass
         self.timeline_url = jobj.get('timeline_url')
         self.events = [Event(jevent) for jevent in jobj.get('events',[])]
+
+
