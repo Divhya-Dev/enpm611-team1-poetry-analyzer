@@ -126,9 +126,9 @@ your own subsection and your own feature section above).
 
 _Replace this line with what this member implemented and contributed._
 
-### [Member 2: name]
+### [Member 2: Tyree Black]
 
-_Replace this line with what this member implemented and contributed._
+_Implemented Feature 1: Label Resolution Analysis. Created `label_resolution.py` to analyze closed issues by label, calculate median resolution times using issue creation dates and closing events, and generate a Matplotlib bar chart comparing the median number of days to close for each label. Added the Feature 1 execution branch to `run.py` so the analysis can be launched using `python run.py --feature 1`._
 
 ### [Member 3: name]
 
