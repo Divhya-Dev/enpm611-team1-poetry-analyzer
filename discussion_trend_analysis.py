@@ -72,6 +72,24 @@ class DiscussionTrendAnalysis:
         return dict(sorted(activity.items()))
 
 
+    @staticmethod
+    def _get_intensity_distribution(
+        issue_comment_counts: List[Tuple[Issue, int]]
+    ) -> Dict[str, int]:
+        """Classify issues by their number of comment events."""
+        distribution = {'Low': 0, 'Medium': 0, 'High': 0}
+
+        for _, comment_count in issue_comment_counts:
+            if comment_count <= 2:
+                distribution['Low'] += 1
+            elif comment_count <= 10:
+                distribution['Medium'] += 1
+            else:
+                distribution['High'] += 1
+
+        return distribution
+
+
     def run(self) -> None:
             """Load issues, report discussion patterns, and display charts."""
             issues: List[Issue] = DataLoader().get_issues() or []
