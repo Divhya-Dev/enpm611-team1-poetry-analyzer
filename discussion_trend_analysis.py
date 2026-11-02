@@ -193,6 +193,41 @@ class DiscussionTrendAnalysis:
         return 'relatively stable'
 
 
+    def _show_monthly_activity_chart(
+        self, monthly_activity: Dict[datetime, Dict[str, int]]
+    ) -> None:
+        """Display monthly comment totals as a dated line chart."""
+        figure, axis = plt.subplots(figsize=(12, 6))
+
+        months = list(monthly_activity.keys())
+
+        comment_totals = [
+            values['comments'] for values in monthly_activity.values()
+        ]
+
+        if months:
+            axis.plot(months, comment_totals, marker='o', linewidth=2)
+            axis.xaxis.set_major_locator(mdates.AutoDateLocator())
+            axis.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
+            figure.autofmt_xdate()
+        else:
+            axis.text(
+                0.5,
+                0.5,
+                'No valid issue creation dates available',
+                ha='center',
+                va='center',
+                transform=axis.transAxes,
+            )
+
+        axis.set_title('Monthly Discussion Activity')
+        axis.set_xlabel('Issue creation month (month and year)')
+        axis.set_ylabel('Number of comments')
+        axis.grid(True, alpha=0.3)
+
+        figure.tight_layout()
+
+
     def run(self) -> None:
             """Load issues, report discussion patterns, and display charts."""
             issues: List[Issue] = DataLoader().get_issues() or []
