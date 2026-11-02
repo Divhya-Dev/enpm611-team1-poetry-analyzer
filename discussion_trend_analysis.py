@@ -252,6 +252,115 @@ class DiscussionTrendAnalysis:
         figure.tight_layout()
 
 
+    @staticmethod
+    def _print_report(
+        issue_comment_counts: List[Tuple[Issue, int]],
+        monthly_activity: Dict[datetime, Dict[str, int]],
+        distribution: Dict[str, int],
+        top_issues: List[Tuple[Issue, int]],
+        total_comments: int,        ) -> None:
+            """Print the requested totals, breakdowns, and interpretation."""
+            total_issues = len(issue_comment_counts)
+    
+            average_comments = (
+                total_comments / total_issues if total_issues else 0.0
+            )
+    
+            print('\nDiscussion Trend Analysis')
+            print('=' * 27)
+    
+            print(f'Total issues analyzed: {total_issues}')
+            print(f'Total comments analyzed: {total_comments}')
+            print(f'Average comments per issue: {average_comments:.2f}')
+    
+            print(
+                'Monthly activity (comments are grouped by issue creation month):'
+            )
+    
+            if monthly_activity:
+                for month, values in monthly_activity.items():
+                    print(
+                        f'  {month:%B %Y}: {values["issues"]} issues, '
+                        f'{values["comments"]} comments'
+                    )
+    
+                highest_count = max(
+                    values['comments'] for values in monthly_activity.values()
+                )
+    
+                lowest_count = min(
+                    values['comments'] for values in monthly_activity.values()
+                )
+    
+                highest_months = [
+                    month.strftime('%B %Y')
+                    for month, values in monthly_activity.items()
+                    if values['comments'] == highest_count
+                ]
+    
+                lowest_months = [
+                    month.strftime('%B %Y')
+                    for month, values in monthly_activity.items()
+                    if values['comments'] == lowest_count
+                ]
+    
+                trend = DiscussionTrendAnalysis._describe_trend(
+                    monthly_activity
+                )
+    
+                print(
+                    f'Highest discussion activity: {", ".join(highest_months)} '
+                    f'({highest_count} comments)'
+                )
+    
+                print(
+                    f'Lowest discussion activity: {", ".join(lowest_months)} '
+                    f'({lowest_count} comments)'
+                )
+    
+                print(f'Discussion activity is {trend}.')
+    
+            else:
+                print('  No issues had a valid creation date.')
+                print('Discussion activity trend: unavailable.')
+    
+            print('Discussion intensity:')
+    
+            for category, count in distribution.items():
+                percentage = (
+                    count / total_issues * 100 if total_issues else 0.0
+                )
+    
+                print(
+                    f'  {category}: {count} issues ({percentage:.1f}%)'
+                )
+    
+            print('Most-discussed issues (ties at fifth place are included):')
+    
+            if top_issues:
+                for issue, comment_count in top_issues:
+                    title = issue.title or 'Untitled issue'
+    
+                    print(
+                        f'  #{issue.number}: {title} '
+                        f'({comment_count} comments)'
+                    )
+            else:
+                print('  No issues to report.')
+    
+            if total_issues:
+                high_share = distribution['High'] / total_issues * 100
+    
+                print(
+                    f'Interpretation: {high_share:.1f}% of issues generated '
+                    f'more than 10 comments; the monthly comparison above shows '
+                    'whether comment volume is shifting over time.'
+                )
+            else:
+                print('Interpretation: no issue data was available to analyze.')
+    
+
+
     def run(self) -> None:
             """Load issues, report discussion patterns, and display charts."""
             issues: List[Issue] = DataLoader().get_issues() or []
