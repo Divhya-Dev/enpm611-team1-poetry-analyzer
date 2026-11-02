@@ -183,7 +183,7 @@ your own subsection and your own feature section above).
 - **Implementation:** Feature 2, contributor activity analysis (`contributor_activity_analysis.py`).
 - **Shared code:** helpers in `model.py` (`is_human`, `closed_date`, `days_to_close`, `human_comments`), a clear error in `data_loader.py` when the data file is missing, and `numpy` in `requirements.txt` (pull request #2).
 
-### [Tyree Black]
+### Tyree Black
 
 _Implemented **Feature 1: Label Resolution Analysis** for the Poetry Issue Analyzer. Developed `label_resolution.py` to calculate median issue resolution times grouped by labels using closed issue data and recorded closing events. Added functionality to display the results in the terminal, including median resolution times and issue counts, and generate a Matplotlib bar chart comparing resolution times across labels. Integrated Feature 1 into `run.py` so users can execute it with `python run.py --feature 1`. Also documented the feature's question, execution instructions, methodology, output, and limitations in the project README.._
 
