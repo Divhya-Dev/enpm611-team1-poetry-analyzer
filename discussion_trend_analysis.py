@@ -90,6 +90,33 @@ class DiscussionTrendAnalysis:
         return distribution
 
 
+    @staticmethod
+    def _get_top_discussed_issues(
+        issue_comment_counts: List[Tuple[Issue, int]], limit: int = 5
+    ) -> List[Tuple[Issue, int]]:
+        """Return the top issues, including every issue tied at the cutoff."""
+        ranked_issues = sorted(
+            issue_comment_counts,
+            key=lambda item: (
+                -item[1],
+                item[0].number,
+                item[0].title or '',
+            ),
+        )
+
+        if not ranked_issues or limit <= 0:
+            return []
+
+        if len(ranked_issues) <= limit:
+            return ranked_issues
+
+        cutoff_count = ranked_issues[limit - 1][1]
+
+        return [
+            item for item in ranked_issues if item[1] >= cutoff_count
+        ]
+
+
     def run(self) -> None:
             """Load issues, report discussion patterns, and display charts."""
             issues: List[Issue] = DataLoader().get_issues() or []
@@ -106,6 +133,14 @@ class DiscussionTrendAnalysis:
             monthly_activity = self._group_monthly_activity(
                 issue_comment_counts
             )
+
+            distribution = self._get_intensity_distribution(
+                issue_comment_counts
+            )
+            
+            top_issues = self._get_top_discussed_issues(
+                issue_comment_counts
+            )        
 
     
     
