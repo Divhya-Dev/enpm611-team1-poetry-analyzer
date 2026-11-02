@@ -1,5 +1,8 @@
 """Analyze discussion activity in Poetry GitHub issues."""
 
+"""
+Feature 3: Discussion Trend Analysis
+"""
 from collections import defaultdict
 from datetime import datetime, timezone
 from statistics import median
