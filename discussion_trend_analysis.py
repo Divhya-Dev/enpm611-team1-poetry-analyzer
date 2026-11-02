@@ -115,6 +115,42 @@ class DiscussionTrendAnalysis:
         return [
             item for item in ranked_issues if item[1] >= cutoff_count
         ]
+    
+
+    @staticmethod
+    def _get_discussion_hotspots(
+        issue_comment_counts: List[Tuple[Issue, int]]
+    ) -> Tuple[float, List[Tuple[Issue, int]]]:
+        """Identify issues with unusually high discussion activity."""
+        if not issue_comment_counts:
+            return 0.0, []
+
+        comment_counts = [
+            count for _, count in issue_comment_counts
+        ]
+
+        median_comments = float(median(comment_counts))
+
+        if median_comments == 0:
+            hotspots = [
+                (issue, count)
+                for issue, count in issue_comment_counts
+                if count > 0
+            ]
+        else:
+            threshold = median_comments * 2
+
+            hotspots = [
+                (issue, count)
+                for issue, count in issue_comment_counts
+                if count >= threshold
+            ]
+
+        hotspots.sort(
+            key=lambda item: (-item[1], item[0].number)
+        )
+
+        return median_comments, hotspots
 
 
     def run(self) -> None:
