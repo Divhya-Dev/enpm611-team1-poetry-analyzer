@@ -61,7 +61,32 @@ Every analysis prints its **question**, **method** and **finding** to the consol
 
 ### Feature 1: Label resolution (`label_resolution_analysis.py`)
 
-_Feature 1 owner: replace this line with the question, run commands, method, output and limitations of feature 1._
+**Question:** Which types of issues, grouped by label, take the longest to resolve in the Poetry project?
+
+**Run Command:**
+```bash
+python run.py --feature 1
+```
+
+The project data path must be configured through the `ENPM611_PROJECT_DATA_PATH` environment variable before running the analysis.
+
+**Method:**
+- Loads issue data using the project's `DataLoader`.
+- Identifies closed issues with valid creation dates and closing events.
+- Calculates resolution time in days using the issue creation date and closing event date.
+- Groups resolution times by issue label.
+- Calculates the median resolution time for each label with at least five resolved issues.
+
+**Output:**
+- Displays each issue label, its median resolution time in days, and the number of issues analyzed in the terminal.
+- Generates a Matplotlib bar chart titled **Median Issue Resolution Time by Label**.
+- The chart compares issue labels on the X-axis against median days to close on the Y-axis.
+
+**Limitations:**
+- Only closed issues with valid creation dates and closing events are included.
+- Issues without usable resolution dates are excluded.
+- Labels with fewer than five resolved issues are excluded from the results.
+- The analysis measures resolution time based on recorded closing events and does not account for the complexity or severity of individual issues._
 
 ### Feature 2: Contributor activity (`contributor_activity_analysis.py`)
 
@@ -158,9 +183,9 @@ your own subsection and your own feature section above).
 - **Implementation:** Feature 2, contributor activity analysis (`contributor_activity_analysis.py`).
 - **Shared code:** helpers in `model.py` (`is_human`, `closed_date`, `days_to_close`, `human_comments`), a clear error in `data_loader.py` when the data file is missing, and `numpy` in `requirements.txt` (pull request #2).
 
-### [Member 2: name]
+### [Tyree Black]
 
-_Replace this line with what this member implemented and contributed._
+_Implemented **Feature 1: Label Resolution Analysis** for the Poetry Issue Analyzer. Developed `label_resolution.py` to calculate median issue resolution times grouped by labels using closed issue data and recorded closing events. Added functionality to display the results in the terminal, including median resolution times and issue counts, and generate a Matplotlib bar chart comparing resolution times across labels. Integrated Feature 1 into `run.py` so users can execute it with `python run.py --feature 1`. Also documented the feature's question, execution instructions, methodology, output, and limitations in the project README.._
 
 ### [Member 3: name]
 
