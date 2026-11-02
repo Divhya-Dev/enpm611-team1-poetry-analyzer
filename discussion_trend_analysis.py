@@ -228,6 +228,30 @@ class DiscussionTrendAnalysis:
         figure.tight_layout()
 
 
+    def _show_intensity_chart(
+    self, distribution: Dict[str, int]
+    ) -> None:
+        """Display the issue discussion-intensity distribution."""
+        figure, axis = plt.subplots(figsize=(8, 6))
+
+        categories = ['Low', 'Medium', 'High']
+        counts = [distribution[category] for category in categories]
+
+        bars = axis.bar(
+            categories,
+            counts,
+            color=['#76b7b2', '#f2cf5b', '#e17c72']
+        )
+
+        axis.set_title('Discussion Intensity Distribution')
+        axis.set_xlabel('Discussion category')
+        axis.set_ylabel('Number of issues')
+        axis.bar_label(bars, padding=3)
+        axis.set_ylim(0, max(counts, default=0) * 1.1 + 1)
+
+        figure.tight_layout()
+
+
     def run(self) -> None:
             """Load issues, report discussion patterns, and display charts."""
             issues: List[Issue] = DataLoader().get_issues() or []
