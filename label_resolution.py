@@ -1,3 +1,4 @@
+
 from collections import defaultdict
 from statistics import median
 import matplotlib.pyplot as plt
@@ -7,11 +8,11 @@ from model import State
 
 
 """
-Feature 1 Analysis Module - run.py feature 1
+Feature 1: Label Resolution Analysis
 """
 
 
-class Feature1Analysis:
+class LabelResolutionAnalysis:
 
     def __init__(self):
         self.issues = DataLoader().get_issues()
@@ -114,7 +115,66 @@ class Feature1Analysis:
             key=lambda item: item[1]["median"]
         )
 
-        print("\nLABEL RESOLUTION ANALYSIS")
+        # Display the analysis question, methodology, and findings.
+        print("\n" + "=" * 60)
+        print("LABEL RESOLUTION ANALYSIS")
+        print("=" * 60)
+
+        print("\nQUESTION:")
+        print(
+            "Which types of issues, grouped by label, take the "
+            "longest to resolve in the Poetry project?"
+        )
+
+        print("\nMETHOD:")
+        print(
+            "1. Identify closed issues with valid creation dates "
+            "and recorded closing events."
+        )
+        print(
+            "2. Calculate the resolution time in days by subtracting "
+            "the issue creation date from its closing date."
+        )
+        print(
+            "3. Group resolution times by issue label."
+        )
+        print(
+            "4. Calculate the median resolution time for each label."
+        )
+        print(
+            "5. Include only labels with at least 5 resolved issues."
+        )
+        print(
+            "6. Sort labels by median resolution time and compare "
+            "the results using a bar chart."
+        )
+
+        print("\nFINDING:")
+
+        longest_label, longest_data = sorted_results[-1]
+        shortest_label, shortest_data = sorted_results[0]
+
+        print(
+            f"The label with the longest median resolution time "
+            f"is '{longest_label}' at "
+            f"{longest_data['median']:.2f} days, based on "
+            f"{longest_data['count']} issues."
+        )
+
+        print(
+            f"The label with the shortest median resolution time "
+            f"is '{shortest_label}' at "
+            f"{shortest_data['median']:.2f} days, based on "
+            f"{shortest_data['count']} issues."
+        )
+
+        print(
+            "\nThese results compare resolution times across labels "
+            "and show which issue categories take longer to resolve."
+        )
+
+        # display the detailed results.
+        print("\nDETAILED RESULTS")
         print("-" * 65)
 
         for label, data in sorted_results:
@@ -124,7 +184,7 @@ class Feature1Analysis:
                 f"Issues: {data['count']}"
             )
 
-        # Generate the bar chart.
+        # generate the bar chart for the analysis.
         labels = [
             item[0] for item in sorted_results
         ]
