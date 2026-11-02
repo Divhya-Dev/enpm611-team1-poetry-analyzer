@@ -388,34 +388,54 @@ class DiscussionTrendAnalysis:
             print("No discussion hotspots found.")
 
 
-
     def run(self) -> None:
-            """Load issues, report discussion patterns, and display charts."""
-            issues: List[Issue] = DataLoader().get_issues() or []
-    
-            issue_comment_counts = [
-                (issue, self._count_comments(issue))
-                for issue in issues
-            ]
-    
-            total_comments = sum(
-                comment_count for _, comment_count in issue_comment_counts
-            )
-    
-            monthly_activity = self._group_monthly_activity(
-                issue_comment_counts
-            )
+        """Load issues, report discussion patterns, and display charts."""
+        issues: List[Issue] = DataLoader().get_issues() or []
 
-            distribution = self._get_intensity_distribution(
-                issue_comment_counts
-            )
-            
-            top_issues = self._get_top_discussed_issues(
-                issue_comment_counts
-            )        
+        #print("Total issues:", len(issues))
+        issue_comment_counts = [
+            (issue, self._count_comments(issue))
+            for issue in issues
+        ]
 
+        total_comments = sum(
+            comment_count for _, comment_count in issue_comment_counts
+        )
+
+        monthly_activity = self._group_monthly_activity(
+            issue_comment_counts
+        )
+
+        distribution = self._get_intensity_distribution(
+            issue_comment_counts
+        )
+        #print("Discussion intensity:", distribution)
+
+
+        top_issues = self._get_top_discussed_issues(
+            issue_comment_counts
+        )
+
+        median_comments, hotspots = self._get_discussion_hotspots(
+            issue_comment_counts
+        )
+
+        self._print_report(
+            issue_comment_counts,
+            monthly_activity,
+            distribution,
+            top_issues,
+            total_comments,
+        )
+
+        self._print_additional_insights(median_comments, hotspots)
+
+        self._show_monthly_activity_chart(monthly_activity)
+        self._show_intensity_chart(distribution)
+        print("Number of open figures:", plt.get_fignums())
+
+        plt.show(block=True)
     
     
 if __name__ == '__main__':
-        DiscussionTrendAnalysis().run()
-    
+    DiscussionTrendAnalysis().run()
