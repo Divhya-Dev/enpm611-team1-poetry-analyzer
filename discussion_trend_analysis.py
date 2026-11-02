@@ -29,54 +29,83 @@ class DiscussionTrendAnalysis:
 
     @staticmethod
     def _parse_event_date(date_value):
-        """Convert a datetime or ISO timestamp string into a UTC datetime."""
+        """Convert a date value into a UTC datetime."""
+
         if date_value is None:
             return None
 
         try:
-            if isinstance(date_value, str):
-                date_value = datetime.fromisoformat(
-                    date_value.replace('Z', '+00:00')
+            if isinstance(date_value, datetime):
+                parsed_date = date_value
+            else:
+                parsed_date = datetime.fromisoformat(
+                    date_value.replace("Z", "+00:00")
                 )
 
-            if not isinstance(date_value, datetime):
-                return None
+            if parsed_date.tzinfo is None:
+                parsed_date = parsed_date.replace(tzinfo=timezone.utc)
 
-            if date_value.tzinfo is None:
-                return date_value.replace(tzinfo=timezone.utc)
-
-            return date_value.astimezone(timezone.utc)
+            return parsed_date.astimezone(timezone.utc)
 
         except (ValueError, TypeError):
             return None
 
 
+    def _group_monthly_activity(self, issues: List[Issue]) -> Dict[datetime, Dict[str, int]]:
+        """Group issue creation and comment activity by month."""
 
-    @staticmethod
-    def _group_monthly_activity(
-        issue_comment_counts: List[Tuple[Issue, int]]
-    ) -> Dict[datetime, Dict[str, int]]:
-        """Group issue counts and their comments by issue creation month."""
-        activity = defaultdict(lambda: {'issues': 0, 'comments': 0})
+        monthly_activity = defaultdict(lambda: {
+            "issues": 0,
+            "comments": 0
+        })
 
-        for issue, comment_count in issue_comment_counts:
-            created_date = issue.created_date
+        for issue in issues:
 
-            if not isinstance(created_date, datetime):
-                continue
+            # Count issues by their creation month
+            issue_date = self._parse_event_date(issue.created_date)
 
-            month = datetime(created_date.year, created_date.month, 1)
-            activity[month]['issues'] += 1
-            activity[month]['comments'] += comment_count
+            if issue_date:
+                month = datetime(
+                    issue_date.year,
+                    issue_date.month,
+                    1,
+                    tzinfo=timezone.utc
+                )
+                monthly_activity[month]["issues"] += 1
 
-        return dict(sorted(activity.items()))
+            # Count comments by the actual comment event date
+            for event in issue.events:
+                if event.event_type == "commented":
 
+                    comment_date = self._parse_event_date(event.event_date)
+
+                    if comment_date:
+                        month = datetime(
+                            comment_date.year,
+                            comment_date.month,
+                            1,
+                            tzinfo=timezone.utc
+                        )
+                        monthly_activity[month]["comments"] += 1
+
+        return dict(sorted(monthly_activity.items()))
+    
 
     @staticmethod
     def _get_intensity_distribution(
         issue_comment_counts: List[Tuple[Issue, int]]
     ) -> Dict[str, int]:
-        """Classify issues by their number of comment events."""
+        """
+        Categorize issues based on their number of comments.
+
+        Low (0-2): Represents minimal discussion or interaction.
+        Medium (3-10): Represents a moderate level of discussion.
+        High (>10): Represents extensive discussion that may indicate
+        complex issues or greater contributor involvement.
+
+        These fixed thresholds provide simple and consistent
+        categories for comparing discussion activity across issues.
+        """
         distribution = {'Low': 0, 'Medium': 0, 'High': 0}
 
         for _, comment_count in issue_comment_counts:
@@ -121,7 +150,20 @@ class DiscussionTrendAnalysis:
     def _get_discussion_hotspots(
         issue_comment_counts: List[Tuple[Issue, int]]
     ) -> Tuple[float, List[Tuple[Issue, int]]]:
-        """Identify issues with unusually high discussion activity."""
+        """
+        Identify issues with unusually high discussion activity.
+
+        The hotspot threshold is set to twice the median number
+        of comments across all issues.
+
+        The median is used because it is less sensitive to extreme
+        values than the mean. Multiplying it by two provides a
+        simple benchmark for identifying issues that receive
+        substantially more discussion than a typical issue.
+
+        If the median is zero, any issue with at least one comment
+        is considered a hotspot.
+        """
         if not issue_comment_counts:
             return 0.0, []
 
@@ -155,31 +197,24 @@ class DiscussionTrendAnalysis:
 
     @staticmethod
     def _describe_trend(
-        monthly_activity: Dict[datetime, Dict[str, int]]
+        monthly_activity: Dict[datetime, Dict[str, int]],
+        metric: str
     ) -> str:
-        """Compare average monthly comments in the first and second halves."""
-        months = list(monthly_activity.items())
+        """Compare the average monthly activity in two time periods."""
+
+        months = list(monthly_activity.values())
 
         if len(months) < 2:
-            return 'relatively stable (not enough monthly data to compare)'
+            return 'stable (not enough monthly data to compare)'
 
-        midpoint = len(months) // 2
+        counts = [values[metric] for values in months]
 
-        earlier_average = (
-            sum(values['comments'] for _, values in months[:midpoint])
-            / midpoint
-        )
+        midpoint = len(counts) // 2
 
-        later_months = months[midpoint:]
+        earlier_average = sum(counts[:midpoint]) / midpoint
+        later_average = sum(counts[midpoint:]) / len(counts[midpoint:])
 
-        later_average = (
-            sum(values['comments'] for _, values in later_months)
-            / len(later_months)
-        )
-
-        overall_average = (
-            sum(values['comments'] for _, values in months) / len(months)
-        )
+        overall_average = sum(counts) / len(counts)
 
         tolerance = overall_average * 0.1
         difference = later_average - earlier_average
@@ -193,39 +228,60 @@ class DiscussionTrendAnalysis:
         return 'relatively stable'
 
 
-    def _show_monthly_activity_chart(
-        self, monthly_activity: Dict[datetime, Dict[str, int]]
-    ) -> None:
-        """Display monthly comment totals as a dated line chart."""
-        figure, axis = plt.subplots(figsize=(12, 6))
+    def _show_monthly_activity_chart(self, monthly_activity):
 
         months = list(monthly_activity.keys())
 
-        comment_totals = [
-            values['comments'] for values in monthly_activity.values()
+        issue_counts = [
+            monthly_activity[month]["issues"]
+            for month in months
         ]
 
-        if months:
-            axis.plot(months, comment_totals, marker='o', linewidth=2)
-            axis.xaxis.set_major_locator(mdates.AutoDateLocator())
-            axis.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
-            figure.autofmt_xdate()
-        else:
-            axis.text(
-                0.5,
-                0.5,
-                'No valid issue creation dates available',
-                ha='center',
-                va='center',
-                transform=axis.transAxes,
-            )
+        comment_counts = [
+            monthly_activity[month]["comments"]
+            for month in months
+        ]
 
-        axis.set_title('Monthly Discussion Activity')
-        axis.set_xlabel('Issue creation month (month and year)')
-        axis.set_ylabel('Number of comments')
-        axis.grid(True, alpha=0.3)
+        fig, ax = plt.subplots(figsize=(15, 7))
 
-        figure.tight_layout()
+        ax.plot(
+            months,
+            issue_counts,
+            marker="o",
+            markersize=3,
+            linewidth=1.5,
+            label="Issues Created"
+        )
+
+        ax.plot(
+            months,
+            comment_counts,
+            marker="o",
+            markersize=3,
+            linewidth=1.5,
+            label="Comments Posted"
+        )
+
+        ax.set_title(
+            f"Monthly Issue and Comment Activity "
+            f"({months[0].year}–{months[-1].year})"
+)
+        ax.set_xlabel("Month")
+        ax.set_ylabel("Number of Activities")
+
+        # Automatically select readable date labels
+        ax.xaxis.set_major_locator(
+            mdates.MonthLocator(interval=3)
+        )
+
+        ax.xaxis.set_major_formatter(
+            mdates.DateFormatter("%b %Y")
+        )
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+
+        fig.autofmt_xdate()
+        fig.tight_layout()
 
 
     def _show_intensity_chart(
@@ -274,7 +330,8 @@ class DiscussionTrendAnalysis:
             print(f'Average comments per issue: {average_comments:.2f}')
     
             print(
-                'Monthly activity (comments are grouped by issue creation month):'
+                'Monthly activity (issues grouped by creation date, '
+                'comments grouped by comment event date):'
             )
     
             if monthly_activity:
@@ -304,9 +361,16 @@ class DiscussionTrendAnalysis:
                     if values['comments'] == lowest_count
                 ]
     
-                trend = DiscussionTrendAnalysis._describe_trend(
-                    monthly_activity
+                issue_trend = DiscussionTrendAnalysis._describe_trend(
+                monthly_activity, 'issues'
                 )
+
+                comment_trend = DiscussionTrendAnalysis._describe_trend(
+                    monthly_activity, 'comments'
+                )
+
+                print(f'Issue creation trend: {issue_trend}.')
+                print(f'Comment activity trend: {comment_trend}.')
     
                 print(
                     f'Highest discussion activity: {", ".join(highest_months)} '
@@ -318,7 +382,6 @@ class DiscussionTrendAnalysis:
                     f'({lowest_count} comments)'
                 )
     
-                print(f'Discussion activity is {trend}.')
     
             else:
                 print('  No issues had a valid creation date.')
@@ -403,14 +466,12 @@ class DiscussionTrendAnalysis:
         )
 
         monthly_activity = self._group_monthly_activity(
-            issue_comment_counts
+            issues
         )
 
         distribution = self._get_intensity_distribution(
             issue_comment_counts
         )
-        #print("Discussion intensity:", distribution)
-
 
         top_issues = self._get_top_discussed_issues(
             issue_comment_counts
@@ -418,6 +479,12 @@ class DiscussionTrendAnalysis:
 
         median_comments, hotspots = self._get_discussion_hotspots(
             issue_comment_counts
+        )
+
+        print("\n"
+            "Issues are grouped by their creation month, while "
+            "comments are grouped by their actual event date. "
+            "Monthly activity is compared across the observation period."
         )
 
         self._print_report(
@@ -429,7 +496,6 @@ class DiscussionTrendAnalysis:
         )
 
         self._print_additional_insights(median_comments, hotspots)
-
         self._show_monthly_activity_chart(monthly_activity)
         self._show_intensity_chart(distribution)
         print("Number of open figures:", plt.get_fignums())
